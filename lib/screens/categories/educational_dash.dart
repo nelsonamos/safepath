@@ -179,8 +179,8 @@ class EducationalResourcesScreen extends StatelessWidget {
 
   Widget languageSupportCard(BuildContext context, int index) {
     List<Map<String, String>> languageItems = [
-      {'language': 'English', 'description': 'Access resources in English.', 'image': 'assets/images/image1.png'},
-      {'language': 'French', 'description': 'Access resources in French.', 'image': 'assets/images/image2.png'},
+      {'language': 'English', 'description': 'Access resources in English.', 'image': 'assets/images/English.png'},
+      {'language': 'French', 'description': 'Access resources in French.', 'image': 'assets/images/French.png'},
     ];
 
     return Card(

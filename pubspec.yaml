@@ -61,6 +61,8 @@ flutter:
     - assets/images/Prevention.png
     - assets/images/Signs.png
     - assets/images/Effects.png
+    - assets/images/French.png
+    - assets/images/English.png
 
 
   # The following line ensures that the Material Icons font is
