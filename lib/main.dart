@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+// Import your newly created pages
+
+import 'screens/lesson/sub_lesson/Alphabet.dart';
+import 'screens/lesson/sub_lesson/Colors.dart';
+import 'screens/lesson/sub_lesson/Greetings.dart';
+import 'screens/lesson/sub_lesson/Pronouns.dart';
+
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/categories/educational_dash.dart';
@@ -60,9 +67,13 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => LoginScreen(),
-        '/RegisterScreen': (context) => RegisterScreen(),
+        '/register': (context) => RegisterScreen(),
         '/home': (context) => HomePage(), // Add HomePage route
-        '/educational_resources': (context) => EducationalResourcesScreen(),
+        '/alphabet': (context) => AlphabetPage(), // Alphabet Page
+        '/colors': (context) => ColorsPage(), // Colors Page
+        '/pronouns': (context) => PronounsPage(), // Pronouns Page
+        '/greetings': (context) => GreetingsPage(), // Greetings Page
+        '/educational_resources': (context) => EducationalResourcesScreen(), // Educational Resources Page
       },
     );
   }

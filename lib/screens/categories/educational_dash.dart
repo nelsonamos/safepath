@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../lesson/french_screen.dart';
+import '../lesson/english_screen.dart';
+// Import the new page
 
 class EducationalResourcesScreen extends StatelessWidget {
   @override
@@ -183,46 +186,61 @@ class EducationalResourcesScreen extends StatelessWidget {
       {'language': 'French', 'description': 'Access resources in French.', 'image': 'assets/images/French.png'},
     ];
 
-    return Card(
-      elevation: 4,
-      margin: EdgeInsets.zero, // Remove extra space outside the card
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(8.0),
-            ),
-            child: AspectRatio(
-              aspectRatio: 1 / 1, // Square image
-              child: Image.asset(
-                languageItems[index]['image']!,
-                fit: BoxFit.cover, // Ensures image fills the space
+    return GestureDetector(
+      onTap: () {
+        if (languageItems[index]['language'] == 'English') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => EnglishLessonScreen()),
+          );
+        } else if (languageItems[index]['language'] == 'French') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => FrenchLessonScreen()),
+          );
+        }
+      },
+      child: Card(
+        elevation: 4,
+        margin: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(8.0),
+              ),
+              child: AspectRatio(
+                aspectRatio: 1 / 1, // Square image
+                child: Image.asset(
+                  languageItems[index]['image']!,
+                  fit: BoxFit.cover, // Ensures image fills the space
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  languageItems[index]['language']!,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    languageItems[index]['language']!,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  languageItems[index]['description']!,
-                  style: TextStyle(fontSize: 14),
-                ),
-              ],
+                  SizedBox(height: 5),
+                  Text(
+                    languageItems[index]['description']!,
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
