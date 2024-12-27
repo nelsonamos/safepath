@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../lesson/french_screen.dart';
 import '../lesson/english_screen.dart';
-// Import the new page
 
 class EducationalResourcesScreen extends StatelessWidget {
   @override
@@ -11,29 +10,21 @@ class EducationalResourcesScreen extends StatelessWidget {
         title: Text('Educational Resources'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.all(16.0),
           children: [
             // Hero Section
             heroSection(context),
-
             SizedBox(height: 20),
-
             // Information Hub Section
             sectionTitle('Information Hub', context),
             infoHubContent(context),
-
             SizedBox(height: 20),
-
             // Local Language Support Section
             sectionTitle('Local Language Support', context),
             localLanguageSupport(context),
-
             SizedBox(height: 20),
-
-            // Additional sections can be added here
           ],
         ),
       ),
@@ -95,25 +86,27 @@ class EducationalResourcesScreen extends StatelessWidget {
   }
 
   Widget infoHubContent(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 2 / 3,
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.7,
+      child: GridView.builder(
+        physics: NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 2 / 3,
+        ),
+        itemCount: 4,
+        itemBuilder: (context, index) {
+          return infoHubCard(context, index);
+        },
       ),
-      itemCount: 4,
-      itemBuilder: (context, index) {
-        return infoHubCard(context, index);
-      },
     );
   }
 
   Widget infoHubCard(BuildContext context, int index) {
     List<Map<String, String>> infoHubItems = [
-      {'title': 'Understanding the Dangers of Drug Abuse', 'description': 'Learn about the various harmful effects of drug abuse and how to recognize the signs of addiction.', 'image': 'assets/images/Understanding.png'},
+      {'title': 'Understanding the Dangers of Drug ', 'description': 'Learn about the various harmful effects of drug abuse .', 'image': 'assets/images/Understanding.png'},
       {'title': 'Prevention Methods', 'description': 'Discover effective ways to prevent drug abuse and protect yourself and loved ones.', 'image': 'assets/images/Prevention.png'},
       {'title': 'Signs of Addiction', 'description': 'Watch this video to understand the warning signs of addiction.', 'image': 'assets/images/Signs.png'},
       {'title': 'Effects of Drug Abuse', 'description': 'A detailed infographic on how drug abuse impacts health.', 'image': 'assets/images/Effects.png'},
@@ -121,41 +114,46 @@ class EducationalResourcesScreen extends StatelessWidget {
 
     return Card(
       elevation: 4,
-      margin: EdgeInsets.zero, // Remove extra space around the card
+      margin: EdgeInsets.zero,
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min, // Minimizes whitespace
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(8.0),
-            ),
-            child: AspectRatio(
-              aspectRatio: 1 / 1, // Square image
+          Expanded(
+            flex: 2,
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(8.0),
+              ),
               child: Image.asset(
                 infoHubItems[index]['image']!,
-                fit: BoxFit.cover, // Ensures image fills the space
+                fit: BoxFit.cover,
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  infoHubItems[index]['title']!,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+          Expanded(
+            flex: 3,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    infoHubItems[index]['title']!,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  infoHubItems[index]['description']!,
-                  style: TextStyle(fontSize: 14),
-                ),
-              ],
+                  SizedBox(height: 5),
+                  Flexible(
+                    child: Text(
+                      infoHubItems[index]['description']!,
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -164,19 +162,21 @@ class EducationalResourcesScreen extends StatelessWidget {
   }
 
   Widget localLanguageSupport(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 2 / 3,
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.4,
+      child: GridView.builder(
+        physics: NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 2 / 3,
+        ),
+        itemCount: 2,
+        itemBuilder: (context, index) {
+          return languageSupportCard(context, index);
+        },
       ),
-      itemCount: 2,
-      itemBuilder: (context, index) {
-        return languageSupportCard(context, index);
-      },
     );
   }
 
@@ -205,38 +205,42 @@ class EducationalResourcesScreen extends StatelessWidget {
         margin: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(8.0),
-              ),
-              child: AspectRatio(
-                aspectRatio: 1 / 1, // Square image
+            Expanded(
+              flex: 2,
+              child: ClipRRect(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(8.0),
+                ),
                 child: Image.asset(
                   languageItems[index]['image']!,
-                  fit: BoxFit.cover, // Ensures image fills the space
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    languageItems[index]['language']!,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      languageItems[index]['language']!,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    languageItems[index]['description']!,
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ],
+                    SizedBox(height: 2),
+                    Flexible(
+                      child: Text(
+                        languageItems[index]['description']!,
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

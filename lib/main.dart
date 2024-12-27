@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 
 // Import your newly created pages
 
-import 'screens/lesson/sub_lesson/Alphabet.dart';
-import 'screens/lesson/sub_lesson/Colors.dart';
-import 'screens/lesson/sub_lesson/Greetings.dart';
-import 'screens/lesson/sub_lesson/Pronouns.dart';
+
 
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/categories/educational_dash.dart';
 import 'screens/home_screen.dart';
+import 'screens/lesson/sub_lesson_en/AlphabetEn.dart';
+import 'screens/lesson/sub_lesson_en/ColorsEn.dart';
+import 'screens/lesson/sub_lesson_en/GreetingsEn.dart';
+import 'screens/lesson/sub_lesson_en/PronounsEn.dart';
+import 'screens/lesson/sub_lesson_fr/Alphabet.dart';
+import 'screens/lesson/sub_lesson_fr/Colors.dart';
+import 'screens/lesson/sub_lesson_fr/Greetings.dart';
+import 'screens/lesson/sub_lesson_fr/Pronouns.dart';
 
 void main() {
   runApp(MyApp());
@@ -74,6 +79,10 @@ class MyApp extends StatelessWidget {
         '/pronouns': (context) => PronounsPage(), // Pronouns Page
         '/greetings': (context) => GreetingsPage(), // Greetings Page
         '/educational_resources': (context) => EducationalResourcesScreen(), // Educational Resources Page
+        '/alphabetEn': (context) => AlphabetEn(),
+        '/colorsEn': (context) => ColorsEn(),
+        '/pronounsEn': (context) => PronounsEn(),
+        '/greetingsEn': (context) => GreetingsEn(),
       },
     );
   }
