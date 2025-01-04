@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "982123151296",
+    "project_id": "safepath-f1558",
+    "storage_bucket": "safepath-f1558.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982123151296:android:23c656a5708dd8bc379225",
+        "android_client_info": {
+          "package_name": "com.example.safepath"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-iuqmVPshZm7HKZL-kFblQ9obmkRdKlY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
