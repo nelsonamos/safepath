@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../lesson/french_screen.dart';
 import '../lesson/english_screen.dart';
 
+
 class EducationalResourcesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -106,57 +107,61 @@ class EducationalResourcesScreen extends StatelessWidget {
 
   Widget infoHubCard(BuildContext context, int index) {
     List<Map<String, String>> infoHubItems = [
-      {'title': 'Understanding the Dangers of Drug ', 'description': 'Learn about the various harmful effects of drug abuse .', 'image': 'assets/images/Understanding.png'},
-      {'title': 'Prevention Methods', 'description': 'Discover effective ways to prevent drug abuse and protect yourself and loved ones.', 'image': 'assets/images/Prevention.png'},
-      {'title': 'Signs of Addiction', 'description': 'Watch this video to understand the warning signs of addiction.', 'image': 'assets/images/Signs.png'},
-      {'title': 'Effects of Drug Abuse', 'description': 'A detailed infographic on how drug abuse impacts health.', 'image': 'assets/images/Effects.png'},
+      {'title': 'Understanding the Dangers of Drug ', 'description': 'Learn about the various harmful effects of drug abuse .', 'image': 'assets/images/Understanding.png', 'route': '/understanding'},
+      {'title': 'Prevention Methods', 'description': 'Discover effective ways to prevent drug abuse and protect yourself and loved ones.', 'image': 'assets/images/Prevention.png', 'route': '/prevention'},
+      {'title': 'Signs of Addiction', 'description': 'Watch this video to understand the warning signs of addiction.', 'image': 'assets/images/Signs.png', 'route': '/signs'},
+      {'title': 'Effects of Drug Abuse', 'description': 'A detailed infographic on how drug abuse impacts health.', 'image': 'assets/images/Effects.png', 'route': '/effects'},
     ];
 
-    return Card(
-      elevation: 4,
-      margin: EdgeInsets.zero,
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: 2,
-            child: ClipRRect(
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(8.0),
-              ),
-              child: Image.asset(
-                infoHubItems[index]['image']!,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    infoHubItems[index]['title']!,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 5),
-                  Flexible(
-                    child: Text(
-                      infoHubItems[index]['description']!,
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  ),
-                ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, infoHubItems[index]['route']!);
+      },
+      child: Card(
+        elevation: 4,
+        margin: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              flex: 2,
+              child: ClipRRect(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(8.0),
+                ),
+                child: Image.asset(
+                  infoHubItems[index]['image']!,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-        ],
+            Expanded(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      infoHubItems[index]['title']!,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Flexible(
+                      child: Text(
+                        infoHubItems[index]['description']!,
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

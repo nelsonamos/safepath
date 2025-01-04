@@ -1,154 +1,234 @@
+import 'dart:io';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../models/user.dart';
+import 'login_screen.dart';  // Import the LoginScreen
 
-class RegisterScreen extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+class RegisterScreen extends StatefulWidget {
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emergencyContactController = TextEditingController();
+  final TextEditingController _occupationController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  XFile? _profile_picture;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickprofile_picture() async {
+    final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _profile_picture = pickedImage;
+    });
+  }
+
+
+
+
+  Future<void> _saveuserData() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Passwords do not match!')),
+      );
+      return;
+    }
+
+    if (_firstNameController.text.isEmpty ||
+        _lastNameController.text.isEmpty ||
+        _phoneController.text.isEmpty ||
+        _emergencyContactController.text.isEmpty ||
+        _occupationController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill in all fields!')),
+      );
+      return;
+    }
+
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    try {
+      // Create the user object
+      user users = user(
+        first_name: _firstNameController.text,
+        last_name: _lastNameController.text,
+        phone: _phoneController.text,
+        emergencyContact: _emergencyContactController.text,
+        occupation: _occupationController.text,
+        email: _emailController.text,
+        password: _passwordController.text, // Storing plaintext password
+        profile_picture: _profile_picture?.path,
+      );
+
+      // Add the user to Firestore
+      await firestore.collection('user').add(users.toMap());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('user data saved successfully!')),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save user data: $e')),
+      );
+    }
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Register',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        automaticallyImplyLeading: false,
+        title: Text('user Details'),
+        backgroundColor: Colors.blue,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Animated Email TextField
-              AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    labelStyle: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                ),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/registration.png'),  // Path to your background image
+                fit: BoxFit.cover,
               ),
-              SizedBox(height: 16),
-
-              // Animated Password TextField
-              AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: TextField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  obscureText: true,
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // Animated Confirm Password TextField
-              AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: TextField(
-                  controller: confirmPasswordController,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    labelStyle: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  obscureText: true,
-                ),
-              ),
-              SizedBox(height: 24),
-
-              // Animated Register Button
-              Hero(
-                tag: 'registerButton',
-                child: ElevatedButton(
-                  onPressed: () {
-                    final email = emailController.text;
-                    final password = passwordController.text;
-                    final confirmPassword = confirmPasswordController.text;
-
-                    // Add your registration logic here
-                    print('Email: $email, Password: $password');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 5,
-                  ),
-                  child: Text(
-                    'Register',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 12),
-
-              // Already have an account? Login
-              FadeTransition(
-                opacity: AlwaysStoppedAnimation(1.0),
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/login');
-                  },
-                  child: Text(
-                    'Already have an account? Login',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.secondary,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _firstNameController,
+                    decoration: InputDecoration(
+                      labelText: 'First Name',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: _lastNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Last Name',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      labelText: 'Phone Number',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: _emergencyContactController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      labelText: 'Emergency Contact',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: _occupationController,
+                    decoration: InputDecoration(
+                      labelText: 'Occupation',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                    obscureText: true,
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: _confirmPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'Confirm Password',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                    obscureText: true,
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      _profile_picture != null
+                          ? CircleAvatar(
+                        backgroundImage: FileImage(
+                          File(_profile_picture!.path),
+                        ),
+                        radius: 40,
+                      )
+                          : CircleAvatar(
+                        child: Icon(Icons.person),
+                        radius: 40,
+                      ),
+                      SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: _pickprofile_picture,
+                        child: Text('Pick Profile Picture'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 24),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _saveuserData,
+                      child: Text('Submit'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

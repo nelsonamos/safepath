@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'register_screen.dart';
+import 'package:fluttertoast/fluttertoast.dart';  // Import Fluttertoast
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -48,9 +50,68 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     super.dispose();
   }
 
-  void _login() {
-    // Add your login logic here
+
+
+  Future<void> _login(BuildContext context) async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    try {
+      // Query the Firestore 'user' collection
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('user')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        // Extract user data
+        var userData = snapshot.docs.first.data() as Map<String, dynamic>;
+        var userId = snapshot.docs.first.id; // Get the user ID
+
+        // Validate password
+        if (userData['password'] == password) {
+          // Save user details in SharedPreferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userId', userId);
+          await prefs.setString('userEmail', email);
+          await prefs.setString('userName', userData['name'] ?? ''); // Example: Assuming user has a 'name' field
+
+          // Navigate to home page with user ID on successful login
+          Navigator.pushReplacementNamed(context, '/home');
+
+          // Show success toast
+          Fluttertoast.showToast(
+            msg: "Login Successful!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        } else {
+          Fluttertoast.showToast(
+            msg: "Incorrect password.",
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+          );
+        }
+      } else {
+        Fluttertoast.showToast(
+          msg: "User with this email does not exist.",
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "An error occurred: ${e.toString()}",
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,121 +121,136 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         backgroundColor: Theme.of(context).colorScheme.primary,
         automaticallyImplyLeading: false,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Email TextField
-                  _buildAnimatedTextField(
-                    label: 'Email',
-                    controller: emailController,
-                    isPassword: false,
-                  ),
-                  SizedBox(height: 16),
-
-                  // Password TextField
-                  _buildAnimatedTextField(
-                    label: 'Password',
-                    controller: passwordController,
-                    isPassword: true,
-                  ),
-                  SizedBox(height: 24),
-
-                  // Login Button
-                  GestureDetector(
-                    onTapDown: (_) {
-                      setState(() {});
-                    },
-                    onTapUp: (_) {
-                      setState(() {
-                        _login();
-                      });
-                    },
-                    child: ElevatedButton(
-                      onPressed: _login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 5,
-                      ),
-                      child: Text(
-                        'Login',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-
-                  // Don't have an account? Register Button
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder: (context, animation, secondaryAnimation) =>
-                              RegisterScreen(),
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                            const begin = Offset(1.0, 0.0);
-                            const end = Offset.zero;
-                            const curve = Curves.easeInOut;
-
-                            var tween = Tween(begin: begin, end: end)
-                                .chain(CurveTween(curve: curve));
-                            var offsetAnimation = animation.drive(tween);
-
-                            return SlideTransition(
-                              position: offsetAnimation,
-                              child: child,
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    child: Text(
-                      'Don’t have an account? Register',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-
-                  // Sample Button to Navigate to Home Page
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Navigate to Home Page
-                      Navigator.pushReplacementNamed(context, '/home');
-                    },
-                    child: Text('Go to Home Page'),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 15),
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ],
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/login.png'),  // Path to your background image
+                fit: BoxFit.cover,
               ),
             ),
           ),
-        ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Email TextField
+                      _buildAnimatedTextField(
+                        label: 'Email',
+                        controller: emailController,
+                        isPassword: false,
+                      ),
+                      SizedBox(height: 16),
+
+                      // Password TextField
+                      _buildAnimatedTextField(
+                        label: 'Password',
+                        controller: passwordController,
+                        isPassword: true,
+                      ),
+                      SizedBox(height: 24),
+
+                      // Login Button
+                      GestureDetector(
+                        onTapDown: (_) {
+                          setState(() {});
+                        },
+                        onTapUp: (_) {
+                          setState(() {
+                            _login(context);
+                          });
+                        },
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _login(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 5,
+                          ),
+                          child: Text(
+                            'Login',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                      ),
+                      SizedBox(height: 16),
+
+                      // Don't have an account? Register Button
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (context, animation, secondaryAnimation) =>
+                                  RegisterScreen(),
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                const begin = Offset(1.0, 0.0);
+                                const end = Offset.zero;
+                                const curve = Curves.easeInOut;
+
+                                var tween = Tween(begin: begin, end: end)
+                                    .chain(CurveTween(curve: curve));
+                                var offsetAnimation = animation.drive(tween);
+
+                                return SlideTransition(
+                                  position: offsetAnimation,
+                                  child: child,
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Don’t have an account? Register',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+
+                      // Sample Button to Navigate to Home Page
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Navigate to Home Page
+                          Navigator.pushReplacementNamed(context, '/home');
+                        },
+                        child: Text('Go to Home Page'),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 15),
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

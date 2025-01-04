@@ -1,9 +1,66 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../models/user.dart'; // Make sure this path is correct for your User model
 import 'categories/educational_dash.dart';
-// Import the new screen
+import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomePage extends StatelessWidget {
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  user? _loggedInUser;
+
+  @override
+  void initState() {
+    super.initState();
+    checkUserLoggedIn();
+  }
+
+  void checkUserLoggedIn() async {
+    String? userId = await getCurrentUserId();
+    if (userId == null) {
+      print('No user is signed in');
+    } else {
+      fetchUserData(userId);
+    }
+  }
+
+  Future<void> fetchUserData(String userId) async {
+    try {
+      // Create a DocumentReference for the user document
+      DocumentReference docRef = FirebaseFirestore.instance.collection('user').doc(userId);
+
+      // Get the document snapshot from the reference
+      DocumentSnapshot doc = await docRef.get();
+
+      if (doc.exists && doc.data() != null) {
+        setState(() {
+          // Assuming 'User' is a model class, populate it with Firestore data
+          _loggedInUser = user.fromFirestore(doc);
+        });
+        print('User data: ${doc.data()}');
+      } else {
+        print('No document found for UID: $userId');
+      }
+    } catch (e) {
+      print('Error fetching user data: ${e.toString()}');
+    }
+  }
+
+  Future<String?> getCurrentUserId() async {
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+     return prefs.getString('userId');
+
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,14 +76,41 @@ class HomePage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,
               ),
-              child: Text(
-                'Welcome!',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundImage: _loggedInUser != null && _loggedInUser!.profile_picture != null
+                            ? FileImage(File(_loggedInUser!.profile_picture!))
+                            : AssetImage('assets/images/user_avatar.jpg') as ImageProvider,
+                      ),
+                      SizedBox(height: 8),
+                    ],
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 20.0),
+                      child: Text(
+                        _loggedInUser != null ? 'Welcome, ${_loggedInUser!.first_name}!' : 'Welcome!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+
+
+
             drawerItem(Icons.home, 'Educational Resources', context),
             drawerItem(Icons.settings, 'Rehabilitation and Counseling', context),
             drawerItem(Icons.group, 'Community Support', context),
@@ -101,6 +185,10 @@ class HomePage extends StatelessWidget {
           GestureDetector(
             onTap: () {},
             child: featureTileContent(Icons.work, 'Job and Skill Training', context),
+          ),
+          GestureDetector(
+            onTap: () {},
+            child: featureTileContent(Icons.work, 'Services', context),
           ),
           GestureDetector(
             onTap: () {},
@@ -307,7 +395,8 @@ class TestimonialCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 3,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -316,7 +405,7 @@ class TestimonialCard extends StatelessWidget {
               '"$quote"',
               style: TextStyle(fontStyle: FontStyle.italic),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 8),
             Text(
               '- $author',
               style: TextStyle(fontWeight: FontWeight.bold),

@@ -1,3 +1,15 @@
+// Project-level build.gradle
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.1'// Use a compatible version
+        classpath 'com.google.gms:google-services:4.4.2' // Correct version
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -8,8 +20,6 @@ allprojects {
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
     project.evaluationDependsOn(":app")
 }
 

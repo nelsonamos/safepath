@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 // Import your newly created pages
-
-
-
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/categories/educational_dash.dart';
 import 'screens/home_screen.dart';
+import 'screens/information_hub/EffectsScreen.dart';
+import 'screens/information_hub/prevention/PreventionScreen.dart';
+import 'screens/information_hub/SignsScreen.dart';
+import 'screens/information_hub/UnderstandingScreen.dart';
 import 'screens/lesson/sub_lesson_en/AlphabetEn.dart';
 import 'screens/lesson/sub_lesson_en/ColorsEn.dart';
 import 'screens/lesson/sub_lesson_en/GreetingsEn.dart';
@@ -17,7 +19,10 @@ import 'screens/lesson/sub_lesson_fr/Colors.dart';
 import 'screens/lesson/sub_lesson_fr/Greetings.dart';
 import 'screens/lesson/sub_lesson_fr/Pronouns.dart';
 
-void main() {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -83,6 +88,10 @@ class MyApp extends StatelessWidget {
         '/colorsEn': (context) => ColorsEn(),
         '/pronounsEn': (context) => PronounsEn(),
         '/greetingsEn': (context) => GreetingsEn(),
+        '/understanding': (context) => UnderstandingScreen(),
+        '/prevention': (context) => PreventionScreen(),
+        '/signs': (context) => SignsScreen(),
+        '/effects': (context) => EffectsScreen(),
       },
     );
   }
