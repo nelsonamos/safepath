@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:safepath/screens/information_hub/prevention/privacy.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:safepath/models/AddictionTracker.dart';
+import 'package:safepath/screens/information_hub/prevention/prevention_dashboard.dart';
 
 class PreventionScreen extends StatefulWidget {
   @override
@@ -11,10 +15,73 @@ class _AddictionTrackerPageState extends State<PreventionScreen> {
   String addiction = '';
   DateTime? soberStartDate;
   int usageCount = 0;
-  int cocaineUsageCount = 0;
+  int substanceUsageCount = 0;
   String reasonToStaySober = '';
   TimeOfDay? dailyPledgeTime;
   TimeOfDay? dailyReviewTime;
+
+  Future<void> _saveData() async {
+    // Retrieve logged-in user's email from SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? email = prefs.getString('email');
+
+    // Construct addictionTracker data
+    final addictionTracker = AddictionTrackers(
+      addiction: addiction,
+      soberStartDate: soberStartDate,
+      usageCount: usageCount,
+      substanceUsageCount: substanceUsageCount,
+      reasonToStaySober: reasonToStaySober,
+      dailyPledgeTime: dailyPledgeTime,
+      dailyReviewTime: dailyReviewTime,
+      email: email, // Add userEmail to the data
+    ).toMap();
+
+    try {
+      // Add data to Firestore collection "addictionTrackers"
+      await FirebaseFirestore.instance.collection('addictionTrackers').add(addictionTracker);
+
+      // Navigate to the DashboardPage after successful data storage
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => DashboardPage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving data: $e')),
+      );
+    }
+  }
+
+  Future<void> _pickDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: soberStartDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != soberStartDate) {
+      setState(() {
+        soberStartDate = picked;
+      });
+    }
+  }
+
+  Future<void> _pickTime(BuildContext context, bool isPledgeTime) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: isPledgeTime ? dailyPledgeTime ?? TimeOfDay.now() : dailyReviewTime ?? TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isPledgeTime) {
+          dailyPledgeTime = picked;
+        } else {
+          dailyReviewTime = picked;
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,18 +97,11 @@ class _AddictionTrackerPageState extends State<PreventionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Addiction',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              // Addiction field
+              Text('Addiction', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
+                decoration: InputDecoration(border: OutlineInputBorder()),
                 onChanged: (value) {
                   setState(() {
                     addiction = value;
@@ -55,58 +115,24 @@ class _AddictionTrackerPageState extends State<PreventionScreen> {
                 },
               ),
               SizedBox(height: 16),
-              Text(
-                'Sober Journey Start Date',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+
+              // Sober Start Date
+              Text('Sober Start Date', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
-              TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
-                readOnly: true,
-                onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      soberStartDate = pickedDate;
-                    });
-                  }
-                },
-                validator: (value) {
-                  if (soberStartDate == null) {
-                    return 'Please select a date';
-                  }
-                  return null;
-                },
-                controller: TextEditingController(
-                  text: soberStartDate != null
-                      ? '${soberStartDate!.day}/${soberStartDate!.month}/${soberStartDate!.year}'
-                      : '',
-                ),
+              Row(
+                children: [
+                  Expanded(child: Text(soberStartDate != null ? DateFormat('yyyy-MM-dd').format(soberStartDate!) : 'Select a date')),
+                  TextButton(onPressed: () => _pickDate(context), child: Text('Pick Date')),
+                ],
               ),
               SizedBox(height: 16),
-              Text(
-                'How many times did you use a substance?',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+
+              // Usage Count
+              Text('Usage Count', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
                 keyboardType: TextInputType.number,
+                decoration: InputDecoration(border: OutlineInputBorder()),
                 onChanged: (value) {
                   setState(() {
                     usageCount = int.tryParse(value) ?? 0;
@@ -120,44 +146,32 @@ class _AddictionTrackerPageState extends State<PreventionScreen> {
                 },
               ),
               SizedBox(height: 16),
-              Text(
-                'On days you used cocaine, how many times did you use it?',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+
+              // Substance Usage Count
+              Text('Substance Usage Count', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
                 keyboardType: TextInputType.number,
+                decoration: InputDecoration(border: OutlineInputBorder()),
                 onChanged: (value) {
                   setState(() {
-                    cocaineUsageCount = int.tryParse(value) ?? 0;
+                    substanceUsageCount = int.tryParse(value) ?? 0;
                   });
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter the cocaine usage count';
+                    return 'Please enter the substance usage count';
                   }
                   return null;
                 },
               ),
               SizedBox(height: 16),
-              Text(
-                'Reason to Stay Sober',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+
+              // Reason to Stay Sober
+              Text('Reason to Stay Sober', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
+                decoration: InputDecoration(border: OutlineInputBorder()),
                 onChanged: (value) {
                   setState(() {
                     reasonToStaySober = value;
@@ -171,97 +185,40 @@ class _AddictionTrackerPageState extends State<PreventionScreen> {
                 },
               ),
               SizedBox(height: 16),
-              Text(
-                'Daily Pledge Time',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
-                readOnly: true,
-                onTap: () async {
-                  TimeOfDay? pickedTime = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.now(),
-                  );
-                  if (pickedTime != null) {
-                    setState(() {
-                      dailyPledgeTime = pickedTime;
-                    });
-                  }
-                },
-                validator: (value) {
-                  if (dailyPledgeTime == null) {
-                    return 'Please select a time';
-                  }
-                  return null;
-                },
-                controller: TextEditingController(
-                  text: dailyPledgeTime != null
-                      ? dailyPledgeTime!.format(context)
-                      : '',
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                'Daily Review Time',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
-                readOnly: true,
-                onTap: () async {
-                  TimeOfDay? pickedTime = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.now(),
-                  );
-                  if (pickedTime != null) {
-                    setState(() {
-                      dailyReviewTime = pickedTime;
-                    });
-                  }
-                },
-                validator: (value) {
-                  if (dailyReviewTime == null) {
-                    return 'Please select a time';
-                  }
-                  return null;
-                },
-                controller: TextEditingController(
-                  text: dailyReviewTime != null
-                      ? dailyReviewTime!.format(context)
-                      : '',
-                ),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Process the data
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Data submitted successfully')),
-                    );
-                    // Navigate to the PrivacyFundamentalsPage
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => PrivacyFundamentalsPage()),
-                    );
-                  }
-                },
-                child: Text('Submit'),
-              ),
 
+              // Daily Pledge Time
+              Text('Daily Pledge Time', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(child: Text(dailyPledgeTime != null ? dailyPledgeTime!.format(context) : 'Select a time')),
+                  TextButton(onPressed: () => _pickTime(context, true), child: Text('Pick Time')),
+                ],
+              ),
+              SizedBox(height: 16),
+
+              // Daily Review Time
+              Text('Daily Review Time', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(child: Text(dailyReviewTime != null ? dailyReviewTime!.format(context) : 'Select a time')),
+                  TextButton(onPressed: () => _pickTime(context, false), child: Text('Pick Time')),
+                ],
+              ),
+              SizedBox(height: 16),
+
+              // Submit button
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _saveData();
+                    }
+                  },
+                  child: Text('Submit'),
+                ),
+              ),
             ],
           ),
         ),

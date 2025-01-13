@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:safepath/screens/information_hub/prevention/DataUsagePage.dart';
+import 'package:safepath/screens/information_hub/prevention/prevention_dashboard.dart';
 
 class PrivacyFundamentalsPage extends StatelessWidget {
   @override
@@ -47,7 +48,10 @@ class PrivacyFundamentalsPage extends StatelessWidget {
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  // Implement your confirmation logic here
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => DashboardPage()),
+                  );
                 },
                 child: Text('Agree'),
               ),

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../models/user.dart'; // Make sure this path is correct for your User model
@@ -53,6 +52,14 @@ class _HomePageState extends State<HomePage> {
       print('Error fetching user data: ${e.toString()}');
     }
   }
+  Future<void> logout(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();  // Clear all data from SharedPreferences
+
+    // Navigate to login screen or any other screen
+    Navigator.of(context).pushReplacementNamed('/login');
+  }
+
 
   Future<String?> getCurrentUserId() async {
      SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -108,18 +115,24 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-
-
-
             drawerItem(Icons.home, 'Educational Resources', context),
             drawerItem(Icons.settings, 'Rehabilitation and Counseling', context),
             drawerItem(Icons.group, 'Community Support', context),
             drawerItem(Icons.work, 'Job and Skill Training', context),
             drawerItem(Icons.attach_money, 'Revenue Generation', context),
             drawerItem(Icons.volunteer_activism, 'Donations', context),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.exit_to_app),
+              title: Text('Logout'),
+              onTap: () async {
+                await logout(context);
+              },
+            ),
           ],
         ),
       ),
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

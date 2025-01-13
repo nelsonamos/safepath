@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:safepath/screens/information_hub/prevention/PreventionScreen.dart';
+import 'package:safepath/screens/information_hub/prevention/prevention_dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../lesson/french_screen.dart';
 import '../lesson/english_screen.dart';
-
 
 class EducationalResourcesScreen extends StatelessWidget {
   @override
@@ -107,16 +110,66 @@ class EducationalResourcesScreen extends StatelessWidget {
 
   Widget infoHubCard(BuildContext context, int index) {
     List<Map<String, String>> infoHubItems = [
-      {'title': 'Understanding the Dangers of Drug ', 'description': 'Learn about the various harmful effects of drug abuse .', 'image': 'assets/images/Understanding.png', 'route': '/understanding'},
+      {'title': 'Understanding the Dangers of Drug', 'description': 'Learn about the various harmful effects of drug abuse.', 'image': 'assets/images/Understanding.png', 'route': '/understanding'},
       {'title': 'Prevention Methods', 'description': 'Discover effective ways to prevent drug abuse and protect yourself and loved ones.', 'image': 'assets/images/Prevention.png', 'route': '/prevention'},
       {'title': 'Signs of Addiction', 'description': 'Watch this video to understand the warning signs of addiction.', 'image': 'assets/images/Signs.png', 'route': '/signs'},
       {'title': 'Effects of Drug Abuse', 'description': 'A detailed infographic on how drug abuse impacts health.', 'image': 'assets/images/Effects.png', 'route': '/effects'},
     ];
 
     return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, infoHubItems[index]['route']!);
-      },
+        onTap: () async {
+          if (infoHubItems[index]['title'] == 'Prevention Methods') {
+            try {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              String? email = prefs.getString('email'); // Use the same key as you used when saving
+
+              if (email != null) {
+                print('Fetched email: $email');
+
+                // Reference to the addictionTrackers collection in Firestore
+                CollectionReference collectionRef = FirebaseFirestore.instance.collection('addictionTrackers');
+
+                // Fetch documents from the collection where the userEmail matches
+                QuerySnapshot querySnapshot = await collectionRef.where('email', isEqualTo: email).get();
+
+                if (querySnapshot.docs.isNotEmpty) {
+                  // If a matching document is found, navigate to DashboardPage
+                  print('Matching document found for email: $email');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => DashboardPage()),
+                  );
+                } else {
+                  // If no matching document is found, navigate to PreventionScreen
+                  print('No matching document found for email: $email');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PreventionScreen()),
+                  );
+                }
+              } else {
+                // Handle case where email is not found in SharedPreferences
+                print('Email not found in SharedPreferences.');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PreventionScreen()),
+                );
+              }
+            } catch (e) {
+              // Handle any errors
+              print('Error checking document in Firestore: $e');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PreventionScreen()),
+              );
+            }
+
+
+          } else {
+            Navigator.pushNamed(context, infoHubItems[index]['route']!);
+          }
+        },
+
       child: Card(
         elevation: 4,
         margin: EdgeInsets.zero,
@@ -164,6 +217,7 @@ class EducationalResourcesScreen extends StatelessWidget {
         ),
       ),
     );
+
   }
 
   Widget localLanguageSupport(BuildContext context) {

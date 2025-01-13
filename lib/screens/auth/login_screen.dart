@@ -73,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           // Save user details in SharedPreferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('userId', userId);
-          await prefs.setString('userEmail', email);
+          await prefs.setString('email', email);
           await prefs.setString('userName', userData['name'] ?? ''); // Example: Assuming user has a 'name' field
 
           // Navigate to home page with user ID on successful login
