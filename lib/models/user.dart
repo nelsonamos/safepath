@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 class user {
   String first_name;
   String last_name;
@@ -8,6 +9,7 @@ class user {
   String email;
   String password;
   String? profile_picture;
+  DateTime? sobrietyDate;
 
   // Constructor for the user class
   user({
@@ -19,6 +21,7 @@ class user {
     required this.email,
     required this.password,
     this.profile_picture,
+    this.sobrietyDate,
   });
 
   // Convert user object to map for Firestore
@@ -32,6 +35,7 @@ class user {
       'email': email,
       'password': password, // Note: Storing passwords in plaintext is not secure
       'profile_picture': profile_picture,
+      'sobrietyDate': sobrietyDate?.toIso8601String(),
     };
   }
 
@@ -46,6 +50,9 @@ class user {
       email: map['email'] ?? '',
       password: map['password'] ?? '',
       profile_picture: map['profile_picture'],
+      sobrietyDate: map['sobrietyDate'] != null
+          ? DateTime.parse(map['sobrietyDate'])
+          : null,
     );
   }
 

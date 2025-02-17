@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:safepath/screens/information_hub/prevention/PreventionScreen.dart';
 import 'package:safepath/screens/information_hub/prevention/prevention_dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../information_hub/prevention/trackinghome.dart';
 import '../lesson/french_screen.dart';
 import '../lesson/english_screen.dart';
 
@@ -117,59 +117,9 @@ class EducationalResourcesScreen extends StatelessWidget {
     ];
 
     return GestureDetector(
-        onTap: () async {
-          if (infoHubItems[index]['title'] == 'Prevention Methods') {
-            try {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              String? email = prefs.getString('email'); // Use the same key as you used when saving
-
-              if (email != null) {
-                print('Fetched email: $email');
-
-                // Reference to the addictionTrackers collection in Firestore
-                CollectionReference collectionRef = FirebaseFirestore.instance.collection('addictionTrackers');
-
-                // Fetch documents from the collection where the userEmail matches
-                QuerySnapshot querySnapshot = await collectionRef.where('email', isEqualTo: email).get();
-
-                if (querySnapshot.docs.isNotEmpty) {
-                  // If a matching document is found, navigate to DashboardPage
-                  print('Matching document found for email: $email');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => DashboardPage()),
-                  );
-                } else {
-                  // If no matching document is found, navigate to PreventionScreen
-                  print('No matching document found for email: $email');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => PreventionScreen()),
-                  );
-                }
-              } else {
-                // Handle case where email is not found in SharedPreferences
-                print('Email not found in SharedPreferences.');
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PreventionScreen()),
-                );
-              }
-            } catch (e) {
-              // Handle any errors
-              print('Error checking document in Firestore: $e');
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => PreventionScreen()),
-              );
-            }
-
-
-          } else {
-            Navigator.pushNamed(context, infoHubItems[index]['route']!);
-          }
-        },
-
+      onTap: () {
+        Navigator.pushNamed(context, infoHubItems[index]['route']!);
+      },
       child: Card(
         elevation: 4,
         margin: EdgeInsets.zero,
@@ -217,94 +167,33 @@ class EducationalResourcesScreen extends StatelessWidget {
         ),
       ),
     );
-
   }
 
   Widget localLanguageSupport(BuildContext context) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.4,
-      child: GridView.builder(
-        physics: NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 2 / 3,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          leading: Icon(Icons.language, color: Theme.of(context).colorScheme.primary),
+          title: Text('French'),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FrenchLessonScreen()),
+            );
+          },
         ),
-        itemCount: 2,
-        itemBuilder: (context, index) {
-          return languageSupportCard(context, index);
-        },
-      ),
-    );
-  }
-
-  Widget languageSupportCard(BuildContext context, int index) {
-    List<Map<String, String>> languageItems = [
-      {'language': 'English', 'description': 'Access resources in English.', 'image': 'assets/images/English.png'},
-      {'language': 'French', 'description': 'Access resources in French.', 'image': 'assets/images/French.png'},
-    ];
-
-    return GestureDetector(
-      onTap: () {
-        if (languageItems[index]['language'] == 'English') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => EnglishLessonScreen()),
-          );
-        } else if (languageItems[index]['language'] == 'French') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => FrenchLessonScreen()),
-          );
-        }
-      },
-      child: Card(
-        elevation: 4,
-        margin: EdgeInsets.zero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              flex: 2,
-              child: ClipRRect(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(8.0),
-                ),
-                child: Image.asset(
-                  languageItems[index]['image']!,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      languageItems[index]['language']!,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Flexible(
-                      child: Text(
-                        languageItems[index]['description']!,
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        ListTile(
+          leading: Icon(Icons.language, color: Theme.of(context).colorScheme.primary),
+          title: Text('English'),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => EnglishLessonScreen()),
+            );
+          },
         ),
-      ),
+      ],
     );
   }
 }

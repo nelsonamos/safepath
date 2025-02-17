@@ -13,7 +13,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool _isObscure = true;
-
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
@@ -59,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     try {
       // Query the Firestore 'user' collection
       QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('user')
+          .collection('users')
           .where('email', isEqualTo: email)
           .get();
 
@@ -74,7 +73,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('userId', userId);
           await prefs.setString('email', email);
-          await prefs.setString('userName', userData['name'] ?? ''); // Example: Assuming user has a 'name' field
+          await prefs.setString('userName', userData['name'] ?? '');
+          await prefs.setString('sobrietyDate', userData['sobrietyDate'] ?? '');
 
           // Navigate to home page with user ID on successful login
           Navigator.pushReplacementNamed(context, '/home');

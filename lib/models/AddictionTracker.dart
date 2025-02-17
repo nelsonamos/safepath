@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// A class to model addiction tracking.
+
 class AddictionTrackers {
   String addiction; // The addiction being tracked
   DateTime? soberStartDate; // The date when the user started being sober
@@ -11,6 +11,7 @@ class AddictionTrackers {
   TimeOfDay? dailyPledgeTime; // Time of the day for the user to take a pledge
   TimeOfDay? dailyReviewTime; // Time of the day for the user to review their progress
   String? email; // The logged-in user's email
+
 
   // Constructor with required and optional fields
   AddictionTrackers({

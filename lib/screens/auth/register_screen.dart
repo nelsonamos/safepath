@@ -22,20 +22,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
-  XFile? _profile_picture;
+  XFile? _profilePicture;
   final ImagePicker _picker = ImagePicker();
+  DateTime? _sobrietyDate;
 
-  Future<void> _pickprofile_picture() async {
+  Future<void> _pickProfilePicture() async {
     final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
-      _profile_picture = pickedImage;
+      _profilePicture = pickedImage;
     });
   }
 
+  Future<void> _picksobrietyDate() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        _sobrietyDate = pickedDate;
+      });
+    }
+  }
 
-
-
-  Future<void> _saveuserData() async {
+  Future<void> _saveUserData() async {
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Passwords do not match!')),
@@ -60,7 +72,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       // Create the user object
-      user users = user(
+      user newUser = user(
         first_name: _firstNameController.text,
         last_name: _lastNameController.text,
         phone: _phoneController.text,
@@ -68,13 +80,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         occupation: _occupationController.text,
         email: _emailController.text,
         password: _passwordController.text, // Storing plaintext password
-        profile_picture: _profile_picture?.path,
+        profile_picture: _profilePicture?.path,
+        sobrietyDate: _sobrietyDate,
       );
 
       // Add the user to Firestore
-      await firestore.collection('user').add(users.toMap());
+      await firestore.collection('users').add(newUser.toMap());
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('user data saved successfully!')),
+        SnackBar(content: Text('User data saved successfully!')),
       );
       Navigator.push(
         context,
@@ -87,14 +100,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('user Details'),
+        title: Text('User Details'),
         backgroundColor: Colors.blue,
       ),
       body: Stack(
@@ -197,12 +207,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     obscureText: true,
                   ),
                   SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _picksobrietyDate,
+                    child: Text('Pick Sobriety Start Date'),
+                  ),
+                  SizedBox(height: 16),
                   Row(
                     children: [
-                      _profile_picture != null
+                      _profilePicture != null
                           ? CircleAvatar(
                         backgroundImage: FileImage(
-                          File(_profile_picture!.path),
+                          File(_profilePicture!.path),
                         ),
                         radius: 40,
                       )
@@ -212,7 +227,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       SizedBox(width: 16),
                       ElevatedButton(
-                        onPressed: _pickprofile_picture,
+                        onPressed: _pickProfilePicture,
                         child: Text('Pick Profile Picture'),
                       ),
                     ],
@@ -220,7 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 24),
                   Center(
                     child: ElevatedButton(
-                      onPressed: _saveuserData,
+                      onPressed: _saveUserData,
                       child: Text('Submit'),
                     ),
                   ),

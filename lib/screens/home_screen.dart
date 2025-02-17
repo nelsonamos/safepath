@@ -1,11 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../helper/help_center_map.dart';
 import '../models/user.dart'; // Make sure this path is correct for your User model
 import 'categories/educational_dash.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'crisis/ChatScreen.dart';
+
 
 
 class HomePage extends StatefulWidget {
@@ -34,7 +40,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> fetchUserData(String userId) async {
     try {
       // Create a DocumentReference for the user document
-      DocumentReference docRef = FirebaseFirestore.instance.collection('user').doc(userId);
+      DocumentReference docRef = FirebaseFirestore.instance.collection('users').doc(userId);
 
       // Get the document snapshot from the reference
       DocumentSnapshot doc = await docRef.get();
@@ -165,12 +171,61 @@ class _HomePageState extends State<HomePage> {
 
             SizedBox(height: 20),
 
+
             // Footer
             footerSection(),
           ],
         ),
       ),
+      floatingActionButton: SpeedDial(
+        animatedIcon: AnimatedIcons.menu_close, // Animated icon
+        backgroundColor: Colors.red, // FAB color
+        overlayColor: Colors.black,
+        overlayOpacity: 0.5,
+        children: [
+          //
+          SpeedDialChild(
+            child: Icon(Icons.phone, color: Colors.white),
+            backgroundColor: Colors.green,
+            label: 'Call Support',
+            onTap: () async {
+              final Uri emergencyNumber = Uri.parse('tel:+112'); // Change to your number
+              if (await canLaunchUrl(emergencyNumber)) {
+                await launchUrl(emergencyNumber);
+              } else {
+                print("Could not launch emergency number");
+              }
+            },
+          ),
+          //
+          SpeedDialChild(
+            child: Icon(Icons.chat, color: Colors.white),
+            backgroundColor: Colors.blue,
+            label: 'Chat with Us',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatScreen()),
+              );
+              // Implement chat functionality here
+            },
+          ),
+          // Find Help Centers
+          SpeedDialChild(
+            child: Icon(Icons.location_on, color: Colors.white),
+            backgroundColor: Colors.orange,
+            label: 'Find Help Centers',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => HelpCenterMap()),
+              );
+            },
+          ),
+        ],
+      ),
     );
+
   }
 
   Widget featureOverview(BuildContext context) {
