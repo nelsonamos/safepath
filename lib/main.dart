@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart'; // Import for notifications
-import 'package:safepath/models/AddictionTracker.dart';
-import 'package:safepath/screens/information_hub/prevention/trackinghome.dart';
-import 'package:safepath/services/NotificationService.dart';
-import 'package:timezone/data/latest.dart' as tz; // Import for timezone
-import 'package:timezone/timezone.dart' as tz; // Import for timezone
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-// Import your newly created pages
+import 'package:safepath/chatpages/view/CommunityChatScreen.dart';
+import 'package:safepath/providers/TransactionProvider.dart';
+import 'package:safepath/screens/information_hub/BubbleGame.dart';
+import 'package:safepath/screens/information_hub/JournalScreen.dart';
+import 'package:safepath/widgets/noti.dart';
+import 'chatpages/create_post_page.dart';
+import 'chatpages/view/PostforumListPage.dart';
+import 'chatpages/view/forum_list_page.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
-import 'screens/categories/educational_dash.dart';
+import 'screens/categories/Resources_dashboard.dart';
 import 'screens/home_screen.dart';
-import 'screens/information_hub/EffectsScreen.dart';
-import 'screens/information_hub/SignsScreen.dart';
-import 'screens/information_hub/UnderstandingScreen.dart';
+import 'screens/information_hub/BreathingScreen.dart';
 import 'screens/lesson/sub_lesson_en/AlphabetEn.dart';
 import 'screens/lesson/sub_lesson_en/ColorsEn.dart';
 import 'screens/lesson/sub_lesson_en/GreetingsEn.dart';
@@ -24,45 +21,45 @@ import 'screens/lesson/sub_lesson_fr/Alphabet.dart';
 import 'screens/lesson/sub_lesson_fr/Colors.dart';
 import 'screens/lesson/sub_lesson_fr/Greetings.dart';
 import 'screens/lesson/sub_lesson_fr/Pronouns.dart';
+import 'package:safepath/screens/information_hub/prevention/trackinghome.dart';
+import 'package:provider/provider.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-Future<void> main() async {
-  tz.initializeTimeZones();
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  initializeNotifications();
-  configureTimeZone();
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => TransactionProvider(),
+      child: MyApp(),
+    ),
+  );
 
-  // Initialize NotificationService
-  const androidInitializationSettings = AndroidInitializationSettings('app_icon');
-  const initializationSettings = InitializationSettings(android: androidInitializationSettings);
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-  final notificationService = NotificationService(flutterLocalNotificationsPlugin);
-
-  runApp(MyApp(notificationService: notificationService));
+  await LocalNotifications.init();
+  LocalNotifications.showPeriodicNotifications(
+    title: "Stay Strong on Your Journey!",
+    body: "Track today’s progress and reflect on how far you’ve come.",
+    payload: "daily_check_in",
+  );
 }
 
-Future<void> initializeNotifications() async {
-  const initializationSettingsAndroid = AndroidInitializationSettings('app_icon'); // Ensure 'app_icon' exists
-
-  const initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings).then((_) {
-    print("Notifications Initialized");
-  }).catchError((error) {
-    print("Error Initializing Notifications: $error");
-  });
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
 }
 
-void configureTimeZone() {
-  tz.initializeTimeZones();
-}
+class _MyAppState extends State<MyApp> {
+  // Your logout function (example)
+  void logout() {
+    // Set the user's status to offline or perform necessary cleanup.
+    print("User logged out and set as offline");
+    // You can add the logic to update the user's status in the database here
+  }
 
-class MyApp extends StatelessWidget {
-  final NotificationService notificationService;
-
-  MyApp({required this.notificationService});
+  @override
+  void dispose() {
+    logout();  // Set isOnline to false when the app closes
+    super.dispose();  // Always call the super.dispose() after cleanup
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,12 +85,29 @@ class MyApp extends StatelessWidget {
         '/colorsEn': (context) => ColorsEn(),
         '/pronounsEn': (context) => PronounsEn(),
         '/greetingsEn': (context) => GreetingsEn(),
-        '/understanding': (context) => UnderstandingScreen(),
+        '/BubbleGame': (context) => BubbleGame(),
         '/prevention': (context) => trackinghome(),
-        '/signs': (context) => SignsScreen(),
-        '/effects': (context) => EffectsScreen(),
+        '/Journal': (context) => JournalScreen(),
+        '/Breathing': (context) => Breathing(),
         '/trackinghome': (context) => const trackinghome(),
+        '/posts': (context) => AllPostsPage(forumId: ''), // Placeholder
+        '/createPost': (context) => CreatePostPage(forumId: ''), // Placeholder
+        '/forum': (context) => ForumListPage(),
 
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/posts') {
+          final forumId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => AllPostsPage(forumId: forumId),
+          );
+        } else if (settings.name == '/createPost') {
+          final forumId = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) => CreatePostPage(forumId: forumId),
+          );
+        }
+        return null;
       },
     );
   }

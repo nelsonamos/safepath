@@ -18,7 +18,9 @@ dependencies {
 android {
     namespace = "com.example.safepath"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "29.0.13113456"
+
+
 
     compileOptions {
         coreLibraryDesugaringEnabled true

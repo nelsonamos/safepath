@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:safepath/screens/information_hub/prevention/prevention_dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../information_hub/prevention/trackinghome.dart';
@@ -11,7 +10,7 @@ class EducationalResourcesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Educational Resources'),
+        title: Text('Resources'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: SafeArea(
@@ -55,7 +54,7 @@ class EducationalResourcesScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'Educational Resources',
+            'Support Resources',
             style: TextStyle(
               color: Colors.white,
               fontSize: 32,
@@ -65,7 +64,7 @@ class EducationalResourcesScreen extends StatelessWidget {
           ),
           SizedBox(height: 10),
           Text(
-            'Empowering you with knowledge and tools for a better future.',
+            'Supporting you with knowledge and tools for a better future.',
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -110,10 +109,10 @@ class EducationalResourcesScreen extends StatelessWidget {
 
   Widget infoHubCard(BuildContext context, int index) {
     List<Map<String, String>> infoHubItems = [
-      {'title': 'Understanding the Dangers of Drug', 'description': 'Learn about the various harmful effects of drug abuse.', 'image': 'assets/images/Understanding.png', 'route': '/understanding'},
-      {'title': 'Prevention Methods', 'description': 'Discover effective ways to prevent drug abuse and protect yourself and loved ones.', 'image': 'assets/images/Prevention.png', 'route': '/prevention'},
-      {'title': 'Signs of Addiction', 'description': 'Watch this video to understand the warning signs of addiction.', 'image': 'assets/images/Signs.png', 'route': '/signs'},
-      {'title': 'Effects of Drug Abuse', 'description': 'A detailed infographic on how drug abuse impacts health.', 'image': 'assets/images/Effects.png', 'route': '/effects'},
+      {'title': 'Reflex', 'description': 'Redirect your attention while sharpening your reflexes', 'image':'assets/images/Understanding.png', 'route': '/BubbleGame'},
+      {'title': 'Sober Days Counter', 'description': 'Track your sober days and celebrate your progress, one day at a time.', 'image': 'assets/images/Prevention.png', 'route': '/prevention'},
+      {'title': 'Journal', 'description': 'Watch this video to understand the warning signs of addiction.', 'image': 'assets/images/Signs.png', 'route': '/Journal'},
+      {'title': 'Breathing exercise', 'description': 'To help users manage stress and cravings by promoting relaxation through guided breathing exercises.', 'image': 'assets/images/Effects.png', 'route': '/Breathing'},
     ];
 
     return GestureDetector(

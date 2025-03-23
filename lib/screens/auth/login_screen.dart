@@ -56,58 +56,45 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     String password = passwordController.text.trim();
 
     try {
-      // Query the Firestore 'user' collection
+      // Query Firestore for user details
       QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('user')
           .where('email', isEqualTo: email)
           .get();
 
       if (snapshot.docs.isNotEmpty) {
-        // Extract user data
         var userData = snapshot.docs.first.data() as Map<String, dynamic>;
-        var userId = snapshot.docs.first.id; // Get the user ID
+        var userId = snapshot.docs.first.id;
 
-        // Validate password
         if (userData['password'] == password) {
-          // Save user details in SharedPreferences
+          // Save user details locally
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('userId', userId);
           await prefs.setString('email', email);
           await prefs.setString('userName', userData['name'] ?? '');
           await prefs.setString('sobrietyDate', userData['sobrietyDate'] ?? '');
 
-          // Navigate to home page with user ID on successful login
+          // Update `isOnline` to true
+          await FirebaseFirestore.instance.collection('user').doc(userId).update({
+            'isOnline': true,
+          });
+
+          // Navigate to home
           Navigator.pushReplacementNamed(context, '/home');
 
-          // Show success toast
           Fluttertoast.showToast(
             msg: "Login Successful!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.green,
             textColor: Colors.white,
-            fontSize: 16.0,
           );
         } else {
-          Fluttertoast.showToast(
-            msg: "Incorrect password.",
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-          );
+          Fluttertoast.showToast(msg: "Incorrect password.", backgroundColor: Colors.red);
         }
       } else {
-        Fluttertoast.showToast(
-          msg: "User with this email does not exist.",
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
+        Fluttertoast.showToast(msg: "User with this email does not exist.", backgroundColor: Colors.red);
       }
     } catch (e) {
-      Fluttertoast.showToast(
-        msg: "An error occurred: ${e.toString()}",
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
+      Fluttertoast.showToast(msg: "An error occurred: ${e.toString()}", backgroundColor: Colors.red);
     }
   }
 

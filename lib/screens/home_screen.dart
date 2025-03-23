@@ -1,18 +1,22 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../chatpages/NavigationPage.dart';
 import '../helper/help_center_map.dart';
 import '../models/user.dart'; // Make sure this path is correct for your User model
-import 'categories/educational_dash.dart';
+import '../test/AddCoursePage.dart';
+import '../test/AddTransactionScreen.dart';
+import '../test/Counselors.dart';
+import '../test/TransactionListScreen.dart';
+import 'categories/Counseling_dashboard.dart';
+import 'categories/Resources_dashboard.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'categories/communityDashboard.dart';
 import 'crisis/ChatScreen.dart';
-
-
 
 class HomePage extends StatefulWidget {
   @override
@@ -40,7 +44,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> fetchUserData(String userId) async {
     try {
       // Create a DocumentReference for the user document
-      DocumentReference docRef = FirebaseFirestore.instance.collection('users').doc(userId);
+      DocumentReference docRef = FirebaseFirestore.instance.collection('user').doc(userId);
 
       // Get the document snapshot from the reference
       DocumentSnapshot doc = await docRef.get();
@@ -48,7 +52,7 @@ class _HomePageState extends State<HomePage> {
       if (doc.exists && doc.data() != null) {
         setState(() {
           // Assuming 'User' is a model class, populate it with Firestore data
-          _loggedInUser = user.fromFirestore(doc);
+          _loggedInUser = user.fromFirestore(doc as DocumentSnapshot<Map<String, dynamic>>);
         });
         print('User data: ${doc.data()}');
       } else {
@@ -58,18 +62,27 @@ class _HomePageState extends State<HomePage> {
       print('Error fetching user data: ${e.toString()}');
     }
   }
-  Future<void> logout(BuildContext context) async {
+  Future<void> logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();  // Clear all data from SharedPreferences
+    String? userId = prefs.getString('userId');
 
-    // Navigate to login screen or any other screen
-    Navigator.of(context).pushReplacementNamed('/login');
+    if (userId != null) {
+      await FirebaseFirestore.instance.collection('user').doc(userId).update({
+        'isOnline': false,
+      });
+
+      await prefs.clear(); // Clear saved session data
+
+      Navigator.pushReplacementNamed(context, '/login'); // Redirect to login
+    }
   }
+
 
 
   Future<String?> getCurrentUserId() async {
      SharedPreferences prefs = await SharedPreferences.getInstance();
      return prefs.getString('userId');
+
 
   }
 
@@ -121,8 +134,8 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            drawerItem(Icons.home, 'Educational Resources', context),
-            drawerItem(Icons.settings, 'Rehabilitation and Counseling', context),
+            drawerItem(Icons.home, 'Resources', context),
+            drawerItem(Icons.settings, 'Counseling', context),
             drawerItem(Icons.group, 'Community Support', context),
             drawerItem(Icons.work, 'Job and Skill Training', context),
             drawerItem(Icons.attach_money, 'Revenue Generation', context),
@@ -132,7 +145,7 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(Icons.exit_to_app),
               title: Text('Logout'),
               onTap: () async {
-                await logout(context);
+                await logout();
               },
             ),
           ],
@@ -240,26 +253,51 @@ class _HomePageState extends State<HomePage> {
                 MaterialPageRoute(builder: (context) => EducationalResourcesScreen()),
               );
             },
-            child: featureTileContent(Icons.menu_book, 'Educational Resources', context),
+            child: featureTileContent(Icons.menu_book, ' Resources', context),
           ),
           GestureDetector(
-            onTap: () {},
-            child: featureTileContent(Icons.health_and_safety, 'Rehabilitation and Counseling', context),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MatchCounselorPage()),
+              );
+            },
+            child: featureTileContent(Icons.health_and_safety, 'Counseling', context),
           ),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => WelcomePage()),
+              );
+            },
             child: featureTileContent(Icons.group, 'Community Support', context),
           ),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddCoursePage()),
+              );
+            },
             child: featureTileContent(Icons.work, 'Job and Skill Training', context),
           ),
           GestureDetector(
-            onTap: () {},
-            child: featureTileContent(Icons.work, 'Services', context),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TransactionListScreen()),
+              );
+            },
+            child: featureTileContent(Icons.work, 'Transaction', context),
           ),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TransactionListScreen()),
+              );
+            },
             child: featureTileContent(Icons.attach_money, 'Revenue Generation', context),
           ),
         ],

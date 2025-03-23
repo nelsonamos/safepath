@@ -17,7 +17,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emergencyContactController = TextEditingController();
-  final TextEditingController _occupationController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -26,6 +25,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final ImagePicker _picker = ImagePicker();
   DateTime? _sobrietyDate;
 
+  String? _selectedObsession;
+
   Future<void> _pickProfilePicture() async {
     final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
@@ -33,7 +34,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
-  Future<void> _picksobrietyDate() async {
+  Future<void> _pickSobrietyDate() async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -59,7 +60,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _lastNameController.text.isEmpty ||
         _phoneController.text.isEmpty ||
         _emergencyContactController.text.isEmpty ||
-        _occupationController.text.isEmpty ||
+        _selectedObsession == null ||
         _emailController.text.isEmpty ||
         _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -71,24 +72,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
 
     try {
-      // Create the user object
       user newUser = user(
         first_name: _firstNameController.text,
         last_name: _lastNameController.text,
         phone: _phoneController.text,
         emergencyContact: _emergencyContactController.text,
-        occupation: _occupationController.text,
+        obsession: _selectedObsession!,
         email: _emailController.text,
-        password: _passwordController.text, // Storing plaintext password
+        password: _passwordController.text,
         profile_picture: _profilePicture?.path,
         sobrietyDate: _sobrietyDate,
+        isOnline: false, // Set default to false at registration
       );
 
-      // Add the user to Firestore
-      await firestore.collection('users').add(newUser.toMap());
+      await firestore.collection('user').add(newUser.toMap());
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('User data saved successfully!')),
       );
+
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -99,6 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/registration.png'),  // Path to your background image
+                image: AssetImage('assets/images/registration.png'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -165,10 +168,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   SizedBox(height: 16),
-                  TextField(
-                    controller: _occupationController,
+                  DropdownButtonFormField<String>(
+                    value: _selectedObsession,
+                    onChanged: (newValue) {
+                      setState(() {
+                        _selectedObsession = newValue;
+                      });
+                    },
+                    items: [
+                      'Mental Health Counseling',
+                      'Career Development & Guidance',
+                      'Academic & School Counseling',
+                      'Marriage & Family Therapy',
+                    ].map((obsession) {
+                      return DropdownMenuItem<String>(
+                        value: obsession,
+                        child: Text(obsession),
+                      );
+                    }).toList(),
                     decoration: InputDecoration(
-                      labelText: 'Occupation',
+                      labelText: 'Advisory Interest',
                       border: OutlineInputBorder(),
                       filled: true,
                       fillColor: Colors.white70,
@@ -208,7 +227,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _picksobrietyDate,
+                    onPressed: _pickSobrietyDate,
                     child: Text('Pick Sobriety Start Date'),
                   ),
                   SizedBox(height: 16),

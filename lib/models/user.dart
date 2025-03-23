@@ -5,60 +5,58 @@ class user {
   String last_name;
   String phone;
   String emergencyContact;
-  String occupation;
+  String obsession;
   String email;
   String password;
   String? profile_picture;
   DateTime? sobrietyDate;
+  bool isOnline;
 
-  // Constructor for the user class
   user({
     required this.first_name,
     required this.last_name,
     required this.phone,
     required this.emergencyContact,
-    required this.occupation,
+    required this.obsession,
     required this.email,
     required this.password,
     this.profile_picture,
     this.sobrietyDate,
+    this.isOnline = false,
   });
 
-  // Convert user object to map for Firestore
+
+  factory user.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
+    final data = snapshot.data()!;
+    return user(
+      first_name: data['first_name'] ?? '',
+      last_name: data['last_name'] ?? '',
+      phone: data['phone'] ?? '',
+      emergencyContact: data['emergencyContact'] ?? '',
+      obsession: data['obsession'] ?? '',
+      email: data['email'] ?? '',
+      password: data['password'] ?? '',
+      profile_picture: data['profile_picture'],
+      sobrietyDate: data['sobrietyDate'] != null
+          ? DateTime.parse(data['sobrietyDate'])
+          : null,
+      isOnline: data['isOnline'] ?? false, // Default to false if not present
+    );
+  }
+
+
   Map<String, dynamic> toMap() {
     return {
       'first_name': first_name,
       'last_name': last_name,
       'phone': phone,
-      'emergency_contact': emergencyContact,
-      'occupation': occupation,
+      'emergencyContact': emergencyContact,
+      'obsession': obsession,
       'email': email,
-      'password': password, // Note: Storing passwords in plaintext is not secure
+      'password': password,
       'profile_picture': profile_picture,
       'sobrietyDate': sobrietyDate?.toIso8601String(),
+      'isOnline': isOnline,
     };
-  }
-
-  // Create a user object from a map (Firestore document)
-  factory user.fromMap(Map<String, dynamic> map) {
-    return user(
-      first_name: map['first_name'] ?? '',
-      last_name: map['last_name'] ?? '',
-      phone: map['phone'] ?? '',
-      emergencyContact: map['emergency_contact'] ?? '',
-      occupation: map['occupation'] ?? '',
-      email: map['email'] ?? '',
-      password: map['password'] ?? '',
-      profile_picture: map['profile_picture'],
-      sobrietyDate: map['sobrietyDate'] != null
-          ? DateTime.parse(map['sobrietyDate'])
-          : null,
-    );
-  }
-
-  // Create a user object from a Firestore document snapshot
-  factory user.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return user.fromMap(data);
   }
 }
